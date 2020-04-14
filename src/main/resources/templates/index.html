@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <title>MDEO Status</title>
+    <link href="styles.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="ag-grid.css">
+    <link rel="stylesheet" href="ag-theme-material.css">
+</head>
+
+<header>
+    <h1>MDEO Index Dashboard</h1>
+    <form method="POST" enctype="multipart/form-data" action="/">
+        <input type="file" name="file" />
+        <input type="submit" value="Upload" />
+    </form>
+    <div><button id="runButton">Run Job</button></div>
+    <div th:if="${message}">
+		<h2 th:text="${message}"/>
+    </div>
+    <div>
+		<ul>
+			<li th:each="file : ${files}">
+				<a th:href="${file}" th:text="${file}" />
+			</li>
+		</ul>
+    </div>
+</header>
+
+<body>
+    <section class="flex-container">
+        <div class="leftside">
+            <div id="myGrid" style="height: 600px;" class="ag-theme-material"></div>
+        </div>
+        <div class="rightside">
+            <h2>Results</h2>
+        </div>
+    </section>
+
+    <script src="main.js"></script>
+
+    <script>
+        $('#runButton').click(function () {
+            console.log('calling /run-job')
+            $.ajax({
+                method: 'POST',
+                url: "/run-job",
+                data: {
+                    moptProjectPath: '/Users/munroazumi/Desktop/IndividualProject/case_studies/scrum-planning/mdeo/scrum-planning',
+                    configuredMoptFilePath: '/Users/munroazumi/Desktop/IndividualProject/case_studies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning.mopt'
+                },
+                success: function (result) {
+                    $("#callRunJobResult").text(result);
+                }
+            })
+        })
+    </script>
+
+</body>
+
+</html>
