@@ -10,13 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.*;
 import java.util.*;
 import java.text.DateFormat;
-
 import org.springframework.boot.CommandLineRunner;
-
 import org.springframework.context.annotation.Bean;
-
+import org.springframework.ui.Model;
 import com.example.demo.storage.StorageProperties;
 import com.example.demo.storage.StorageService;
+import java.io.FileWriter;
+import java.io.IOException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -73,6 +77,47 @@ public class DemoApplication {
 
 		System.out.println(sb.toString());
 		return sb.toString();
+	}
+
+	@PostMapping("/addjson")
+	public String addJson() {
+		UUID uuid = UUID.randomUUID();
+		String batchID = uuid.toString();
+
+		JSONObject jobDetails = new JSONObject();
+        jobDetails.put("id", batchID);
+        jobDetails.put("status", "running");
+		jobDetails.put("name", "userinput");
+		jobDetails.put("timeElapsed", "0 minutes");
+		jobDetails.put("timeFinished", "willdo");
+         
+        //JSONObject jobObject = new JSONObject(); 
+        //jobObject.put("job", jobDetails);
+         
+		//Add jobs to list
+		JSONParser jsonParser = new JSONParser();
+		try (FileReader reader = new FileReader("src/main/resources/static/FakeData.json"))
+        {
+			Object obj = jsonParser.parse(reader);
+			JSONArray jobList = (JSONArray) obj;
+			jobList.add(jobDetails);
+			//Write JSON file
+			try (FileWriter file = new FileWriter("src/main/resources/static/FakeData.json")) {
+ 
+				file.write(jobList.toJSONString());
+				file.flush();
+	 
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+		return "yessir";
 	}
 
 	@PostMapping("/run-job")
