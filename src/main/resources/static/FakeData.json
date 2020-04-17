@@ -1,37 +1,51 @@
 [
     {
-        "id": "0",
-        "status": "running",
-        "name": "somename",
-        "timeElapsed": "8 minutes",
-        "timeFinished": "notyet"
+       "timeElapsed":"8 minutes",
+       "name":"somename",
+       "id":"0",
+       "timeFinished":"notyet",
+       "status":"running"
     },
     {
-        "id": "1",
-        "status": "running",
-        "name": "othername",
-        "timeElapsed": "24 minutes",
-        "timeFinished": "notyet"
+       "timeElapsed":"24 minutes",
+       "name":"othername",
+       "id":"1",
+       "timeFinished":"notyet",
+       "status":"running"
     },
     {
-        "id": "2",
-        "status": "finished",
-        "name": "doneone",
-        "timeElapsed": "24 minutes",
-        "timeFinished": "9/4/2020 08:34:48"
+       "timeElapsed":"24 minutes",
+       "name":"doneone",
+       "id":"2",
+       "timeFinished":"9\/4\/2020 08:34:48",
+       "status":"finished"
     },
     {
-        "id": "3",
-        "status": "finished",
-        "name": "thiswundun",
-        "timeElapsed": "49 minutes",
-        "timeFinished": "9/3/2020 14:22:03"
+       "timeElapsed":"49 minutes",
+       "name":"thiswundun",
+       "id":"3",
+       "timeFinished":"9\/3\/2020 14:22:03",
+       "status":"finished"
     },
     {
-        "id": "3sdf",
-        "status": "asdf",
-        "name": "fdsf",
-        "timeElapsed": "49 sdf",
-        "timeFinished": "9/3/dsfasd 14:22:03"
+       "timeElapsed":"49 sdf",
+       "name":"fdsf",
+       "id":"3sdf",
+       "timeFinished":"9\/3\/dsfasd 14:22:03",
+       "status":"asdf"
+    },
+    {
+       "timeElapsed":"0 minutes",
+       "name":"what.ever",
+       "id":"0",
+       "timeFinished":"N\/A",
+       "status":"running"
+    },
+    {
+       "timeElapsed":"0 minutes",
+       "name":"userinput",
+       "id":"d83738b2-ddb4-4ffd-af4e-e447b4311122",
+       "timeFinished":"willdo",
+       "status":"running"
     }
-]
+ ]

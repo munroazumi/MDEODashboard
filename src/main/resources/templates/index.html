@@ -13,21 +13,7 @@
 
 <header>
     <h1>MDEO Index Dashboard</h1>
-    <form method="POST" enctype="multipart/form-data" action="/">
-        <input type="file" name="file" />
-        <input type="submit" value="Upload" />
-    </form>
-    <div><button id="runButton">Run Job</button></div>
-    <div th:if="${message}">
-		<h2 th:text="${message}"/>
-    </div>
-    <div>
-		<ul>
-			<li th:each="file : ${files}">
-				<a th:href="${file}" th:text="${file}" />
-			</li>
-		</ul>
-    </div>
+    <button onclick="refreshGrid()">Refresh</button>
 </header>
 
 <body>
@@ -36,21 +22,82 @@
             <div id="myGrid" style="height: 600px;" class="ag-theme-material"></div>
         </div>
         <div class="rightside">
-            <h2>Results</h2>
+            <h2>Case Studies</h2>
+            <select id="problemSelect">
+                <option value="">select a problem to run</option>
+                <option 
+                    value="argumentation" 
+                    data-mopt-project-path="src/main/resources/case_studies/argumentation/mdeo/argumentation"
+                    data-configured-mopt-file-path="src/main/resources/case_studies/argumentation/mdeo/argumentation/src/main/java/argumentation-framework-argmat-sat-solver.mopt">
+                    argumentation (broken)</option>
+                <option 
+                    value="cra" 
+                    data-mopt-project-path="src/main/resources/case_studies/class-responsability-assignment/mdeo/cra"
+                    data-configured-mopt-file-path="src/main/resources/case_studies/class-responsability-assignment/mdeo/cra/src/main/java/cra_manual_rules.mopt">
+                    cra (broken)</option>
+                <option 
+                    value="scrum" 
+                    data-mopt-project-path="src/main/resources/case_studies/scrum-planning/mdeo/scrum-planning"
+                    data-configured-mopt-file-path="src/main/resources/case_studies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning.mopt">
+                    scrum</option>
+                <option 
+                    value="nrp" 
+                    data-mopt-project-path="src/main/resources/case_studies/next-release-problem/mdeo/nrp"
+                    data-configured-mopt-file-path="src/main/resources/case_studies/next-release-problem/mdeo/nrp/src/main/java/nrp.mopt">
+                    nrp</option>
+            </select>
+            <div><button id="runButton">Run Job</button></div>
+            <div><button id="addJSON">Add to Fake Data</button></div>
+            <div><button id="addtodb">Add to DB</button></div>
         </div>
     </section>
 
+    <p th:text="${test}" />
+
     <script src="main.js"></script>
+    <script>
+        $('#addJSON').click(function() {
+            console.log('calling /addjson')
+            $.ajax({
+                method: 'GET',
+                url: "addjson",
+                success: function (result) {
+                    refreshGrid();
+                    console.log(result);
+                }
+            })
+        })
+    </script>
+
+<script>
+    $('#addtodb').click(function() {
+        console.log('calling /addtodatabase')
+        $.ajax({
+            method: 'GET',
+            url: "addtodatabase",
+            success: function (result) {
+                console.log(result);
+            }
+        })
+    })
+</script>
 
     <script>
         $('#runButton').click(function () {
+            $("#callRunJobResult").text('');
+            let $selectedOption = $('#problemSelect option:selected')
+            if (!$selectedOption.val()){
+                $("#callRunJobResult").text('please select a problem');
+                return
+            }
             console.log('calling /run-job')
             $.ajax({
                 method: 'POST',
                 url: "/run-job",
+                timeout: 30 * 60 * 1000, // 30 minutes timeout to tolerate most long running jobs
                 data: {
-                    moptProjectPath: '/Users/munroazumi/Desktop/IndividualProject/case_studies/scrum-planning/mdeo/scrum-planning',
-                    configuredMoptFilePath: '/Users/munroazumi/Desktop/IndividualProject/case_studies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning.mopt'
+                    moptProjectPath: $selectedOption.attr('data-mopt-project-path'),
+                    configuredMoptFilePath: $selectedOption.attr('data-configured-mopt-file-path')
                 },
                 success: function (result) {
                     $("#callRunJobResult").text(result);

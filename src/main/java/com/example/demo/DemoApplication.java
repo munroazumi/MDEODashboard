@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.io.*;
 import java.util.*;
+import java.util.Date;
 import java.text.DateFormat;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +20,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import java.sql.*;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -48,6 +48,7 @@ public class DemoApplication {
 
 	private static MoptStandaloneSetupGenerated moptStandaloneSetup = new MoptStandaloneSetupGenerated();
 	private ResourceSet resourceSet = new ResourceSetImpl();
+	public static JSONArray job = new JSONArray();
 
 	public static void main(String[] args) {
 		moptStandaloneSetup.createInjectorAndDoEMFRegistration();
@@ -63,61 +64,45 @@ public class DemoApplication {
 		};
 	}
 
-	@GetMapping("/hello")
-	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-		NondominatedPopulation result = new Executor().withProblem("UF1").withAlgorithm("NSGAII")
-				.withMaxEvaluations(10000).run();
-
-		StringBuilder sb = new StringBuilder();
-		sb.append("Objective1  Objective2\n");
-
-		for (Solution solution : result) {
-			sb.append(String.format("%.4f      %.4f%n", solution.getObjective(0), solution.getObjective(1)));
-		}
-
-		System.out.println(sb.toString());
-		return sb.toString();
-	}
-
-	@PostMapping("/addjson")
-	public String addJson() {
+	@GetMapping(path = "/addjson")
+    public JSONArray sayHello()
+    {
 		UUID uuid = UUID.randomUUID();
 		String batchID = uuid.toString();
-
-		JSONObject jobDetails = new JSONObject();
+        JSONObject jobDetails = new JSONObject();
         jobDetails.put("id", batchID);
         jobDetails.put("status", "running");
 		jobDetails.put("name", "userinput");
 		jobDetails.put("timeElapsed", "0 minutes");
 		jobDetails.put("timeFinished", "willdo");
-         
-        //JSONObject jobObject = new JSONObject(); 
-        //jobObject.put("job", jobDetails);
-         
-		//Add jobs to list
-		JSONParser jsonParser = new JSONParser();
-		try (FileReader reader = new FileReader("src/main/resources/static/FakeData.json"))
-        {
-			Object obj = jsonParser.parse(reader);
-			JSONArray jobList = (JSONArray) obj;
-			jobList.add(jobDetails);
-			//Write JSON file
-			try (FileWriter file = new FileWriter("src/main/resources/static/FakeData.json")) {
- 
-				file.write(jobList.toJSONString());
-				file.flush();
-	 
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-		return "yessir";
+		job.add(jobDetails);
+		return job;
+	}
+	
+	@GetMapping(path = "/getjson")
+    public JSONArray getJson()
+    {
+		return job;
+	}
+	
+	@GetMapping(path = "/addtodatabase")
+	public static void post() throws Exception {
+		final String var1 = "running";
+		final String var2 = "thing";
+		final int var3 = 19;
+		final String var4 = "asdfasdf";
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			System.out.println("asdf");
+			String url = "jdbc:mysql://${MYSQL_HOST:localhost}:3306/MDEOProject";
+			Connection con = DriverManager.getConnection(url);
+			PreparedStatement posted = con.prepareStatement("INSERT INTO jobs (status, name, timeElapsed, timeFinished) VALUES('"+var1+"', '"+var2+"', "+var3+", '"+var4+"'");
+			posted.executeUpdate();
+		} catch(Exception e) {
+			System.out.println(e);
+		} finally {
+			System.out.println("Inserted");
+		}
 	}
 
 	@PostMapping("/run-job")
