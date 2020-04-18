@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.*;
 import java.util.*;
 import java.util.Date;
+import java.time.*;
 import java.text.DateFormat;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -64,45 +65,82 @@ public class DemoApplication {
 		};
 	}
 
-	@GetMapping(path = "/addjson")
-    public JSONArray sayHello()
-    {
-		UUID uuid = UUID.randomUUID();
-		String batchID = uuid.toString();
-        JSONObject jobDetails = new JSONObject();
-        jobDetails.put("id", batchID);
-        jobDetails.put("status", "running");
-		jobDetails.put("name", "userinput");
-		jobDetails.put("timeElapsed", "0 minutes");
-		jobDetails.put("timeFinished", "willdo");
-		job.add(jobDetails);
-		return job;
+	public Connection connectToSQL(Connection con) throws Exception {
+		Properties connectionProps = new Properties();
+    		connectionProps.put("user", "mdeo");
+    		connectionProps.put("password", "asdf");
+			String url = "jdbc:mysql://localhost:3306/MDEOProject";
+			con = DriverManager.getConnection(url, connectionProps);
+			return con;
 	}
 	
-	@GetMapping(path = "/getjson")
-    public JSONArray getJson()
+	@GetMapping(path = "/getjobs") //Querys MySQL database and gets all jobs. Used to populate ag-Grid in main.js
+    public JSONArray getJobs() throws Exception {
     {
-		return job;
+		JSONArray result = new JSONArray();
+		Properties connectionProps = new Properties();
+    		connectionProps.put("user", "mdeo");
+    		connectionProps.put("password", "asdf");
+			String url = "jdbc:mysql://localhost:3306/MDEOProject";
+			Connection con = DriverManager.getConnection(url, connectionProps);
+			String sql = "SELECT * FROM job;";
+			System.out.println(sql);
+			PreparedStatement posted = con.prepareStatement(sql);
+			ResultSet rs = posted.executeQuery();
+			while (rs.next()) {
+				Integer id = rs.getInt("id");
+				String status = rs.getString("status");
+				String name = rs.getString("name");
+				Timestamp timestarted = rs.getTimestamp("timeStarted");
+				Timestamp timefinished = rs.getTimestamp("timeFinished");
+				System.out.println(id + "\t" + status +
+								   "\t" + name + "\t" + timestarted +
+								   "\t" + timefinished);
+			JSONObject jobDetails = new JSONObject();
+			jobDetails.put("id", id);
+        	jobDetails.put("status", status);
+			jobDetails.put("name", name);
+			jobDetails.put("timeStarted", timestarted);
+			jobDetails.put("timeFinished", timefinished);
+			result.add(jobDetails);
+			}
+		return result;
+	}
 	}
 	
 	@GetMapping(path = "/addtodatabase")
-	public static void post() throws Exception {
+	public Integer post() throws Exception {
+		LocalDateTime startTime = LocalDateTime.now();
 		final String var1 = "running";
 		final String var2 = "thing";
-		final int var3 = 19;
-		final String var4 = "asdfasdf";
+		final String var3 = startTime.toString();
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
+			Class.forName("com.mysql.jdbc.Driver");
 			System.out.println("asdf");
-			String url = "jdbc:mysql://${MYSQL_HOST:localhost}:3306/MDEOProject";
-			Connection con = DriverManager.getConnection(url);
-			PreparedStatement posted = con.prepareStatement("INSERT INTO jobs (status, name, timeElapsed, timeFinished) VALUES('"+var1+"', '"+var2+"', "+var3+", '"+var4+"'");
+			Properties connectionProps = new Properties();
+    		connectionProps.put("user", "mdeo");
+    		connectionProps.put("password", "asdf");
+			String url = "jdbc:mysql://localhost:3306/MDEOProject";
+			Connection con = DriverManager.getConnection(url, connectionProps);
+			String generatedColumns[] = { "id" };
+			String sql = "INSERT INTO job (status, name, timestarted) VALUES('"+var1+"', '"+var2+"', '"+var3+"')";
+			System.out.println(sql);
+			PreparedStatement posted = con.prepareStatement(sql, generatedColumns);
 			posted.executeUpdate();
+			try (ResultSet generatedKeys = posted.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					return generatedKeys.getInt(1);
+				}
+				else {
+					throw new SQLException("Creating user failed, no ID obtained.");
+				}
+			}
 		} catch(Exception e) {
 			System.out.println(e);
 		} finally {
 			System.out.println("Inserted");
 		}
+		return -1;
 	}
 
 	@PostMapping("/run-job")
@@ -112,8 +150,22 @@ public class DemoApplication {
 		@RequestParam(value = "configuredMoptFilePath")
 		final String configuredMoptFilePath, 
 		@RequestParam(value = "batch", required = false)
-		final Integer batch) {
+		final Integer batch) throws Exception {
+		int id = this.post();
+		if (id < 0) {
+			return "bad";
+		}
 		this._runJob(moptProjectPath, configuredMoptFilePath, batch);
+		Properties connectionProps = new Properties();
+    		connectionProps.put("user", "mdeo");
+    		connectionProps.put("password", "asdf");
+			String url = "jdbc:mysql://localhost:3306/MDEOProject";
+			Connection con = DriverManager.getConnection(url, connectionProps);
+			LocalDateTime finishTime = LocalDateTime.now();
+			String sql = "UPDATE job SET status = 'finished', timefinished = '"+finishTime.toString()+"' WHERE id = "+id;
+			System.out.println(sql);
+			PreparedStatement posted = con.prepareStatement(sql);
+			posted.executeUpdate();
 		return "succeeded";
 	}
 

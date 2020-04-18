@@ -19,7 +19,7 @@ public class MainController {
 	public @ResponseBody String addNewJob (
 		@RequestParam String name,
 		@RequestParam String status,
-		@RequestParam Integer timeelapsed,
+		@RequestParam Integer timestarted,
 		@RequestParam String timefinished) {
     // @ResponseBody means the returned String is the response, not a view name
     // @RequestParam means it is a parameter from the GET or POST request
@@ -27,7 +27,7 @@ public class MainController {
     Job n = new Job();
     n.setStatus(status);
     n.setName(name);
-    n.setTimeElapsed(timeelapsed);
+    n.setTimeStarted(timestarted);
     n.setTimeFinished(timefinished);
     jobRepository.save(n);
     return "Saved";

@@ -10,7 +10,7 @@ public class Job {
   private Integer id;
   private String status;
   private String name;
-  private Integer timeelapsed;
+  private Integer timestarted;
   private String timefinished;
 
   public Integer getId() {
@@ -37,12 +37,12 @@ public class Job {
     this.status = status;
   }
 
-  public Integer getTimeElapsed() {
-    return timeelapsed;
+  public Integer getTimeStarted() {
+    return timestarted;
   }
 
-  public void setTimeElapsed(Integer timeelapsed) {
-    this.timeelapsed = timeelapsed;
+  public void setTimeStarted(Integer timestarted) {
+    this.timestarted = timestarted;
   }
 
   public String getTimeFinished() {

@@ -27,47 +27,39 @@
                 <option value="">select a problem to run</option>
                 <option 
                     value="argumentation" 
-                    data-mopt-project-path="src/main/resources/case_studies/argumentation/mdeo/argumentation"
-                    data-configured-mopt-file-path="src/main/resources/case_studies/argumentation/mdeo/argumentation/src/main/java/argumentation-framework-argmat-sat-solver.mopt">
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/argumentation/mdeo/argumentation"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/argumentation/mdeo/argumentation/src/main/java/argumentation-framework-argmat-sat-solver.mopt">
                     argumentation (broken)</option>
                 <option 
                     value="cra" 
-                    data-mopt-project-path="src/main/resources/case_studies/class-responsability-assignment/mdeo/cra"
-                    data-configured-mopt-file-path="src/main/resources/case_studies/class-responsability-assignment/mdeo/cra/src/main/java/cra_manual_rules.mopt">
-                    cra (broken)</option>
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/class-responsability-assignment/mdeo/cra"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/class-responsability-assignment/mdeo/cra/src/main/java/cra_manual_rules.mopt">
+                    cra</option>
                 <option 
                     value="scrum" 
-                    data-mopt-project-path="src/main/resources/case_studies/scrum-planning/mdeo/scrum-planning"
-                    data-configured-mopt-file-path="src/main/resources/case_studies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning.mopt">
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/scrum-planning/mdeo/scrum-planning"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning.mopt">
                     scrum</option>
                 <option 
                     value="nrp" 
-                    data-mopt-project-path="src/main/resources/case_studies/next-release-problem/mdeo/nrp"
-                    data-configured-mopt-file-path="src/main/resources/case_studies/next-release-problem/mdeo/nrp/src/main/java/nrp.mopt">
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/next-release-problem/mdeo/nrp"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/next-release-problem/mdeo/nrp/src/main/java/nrp.mopt">
                     nrp</option>
+                    <option 
+                    value="refactoring" 
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/refactoring/mdeo/refactoring"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/refactoring/mdeo/refactoring/src/main/java/refactoring_model_a.mopt">
+                    refactoring (broken)</option>
             </select>
             <div><button id="runButton">Run Job</button></div>
-            <div><button id="addJSON">Add to Fake Data</button></div>
             <div><button id="addtodb">Add to DB</button></div>
         </div>
     </section>
 
     <p th:text="${test}" />
 
+    <!--Grid-->
     <script src="main.js"></script>
-    <script>
-        $('#addJSON').click(function() {
-            console.log('calling /addjson')
-            $.ajax({
-                method: 'GET',
-                url: "addjson",
-                success: function (result) {
-                    refreshGrid();
-                    console.log(result);
-                }
-            })
-        })
-    </script>
 
 <script>
     $('#addtodb').click(function() {
