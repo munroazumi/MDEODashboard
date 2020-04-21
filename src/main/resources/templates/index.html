@@ -6,25 +6,24 @@
     <link href="styles.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+    <script src="https://unpkg.com/ag-grid-enterprise/dist/ag-grid-enterprise.min.noStyle.js"></script>
     <link rel="stylesheet" href="ag-grid.css">
-    <link rel="stylesheet" href="ag-theme-material.css">
+    <link rel="stylesheet" href="ag-theme-alpine-dark.css">
+    <link rel="stylesheet" href="ag-theme-balham-dark.css">
 </head>
 
 <header>
-    <h1>MDEO Index Dashboard</h1>
-    <button onclick="refreshGrid()">Refresh</button>
+    <div class="headerleft"><h1>MDEO Index Dashboard</h1></div>
+    <div class="headerright"><button class="refreshButton" onclick="refreshGrid()">Refresh</button></div>
 </header>
 
 <body>
     <section class="flex-container">
         <div class="leftside">
-            <div id="myGrid" style="height: 600px;" class="ag-theme-material"></div>
-        </div>
-        <div class="rightside">
             <h2>Case Studies</h2>
-            <select id="problemSelect">
-                <option value="">select a problem to run</option>
+            <p>Choose the .mopt file you want to run.</p>
+            <select class="problemSelect" id="problemSelect">
+                <option value="">Select a problem to run</option>
                 <option 
                     value="argumentation" 
                     data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/argumentation/mdeo/argumentation"
@@ -34,17 +33,37 @@
                     value="cra" 
                     data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/class-responsability-assignment/mdeo/cra"
                     data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/class-responsability-assignment/mdeo/cra/src/main/java/cra_manual_rules.mopt">
-                    cra</option>
+                    cra_manual_rules</option>
                 <option 
                     value="scrum" 
                     data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/scrum-planning/mdeo/scrum-planning"
                     data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning.mopt">
-                    scrum</option>
+                    scrum-planning</option>
+                    <option 
+                    value="scrum2" 
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/scrum-planning/mdeo/scrum-planning"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/scrum-planning/mdeo/scrum-planning/src/main/java/scrum-planning-rulegen.mopt">
+                    scrum-planning-rulegen</option>
                 <option 
                     value="nrp" 
                     data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/next-release-problem/mdeo/nrp"
                     data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/next-release-problem/mdeo/nrp/src/main/java/nrp.mopt">
-                    nrp</option>
+                    nrp (runs but no results)</option>
+                    <option 
+                    value="nrp2" 
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/next-release-problem/mdeo/nrp"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/next-release-problem/mdeo/nrp/src/main/java/nrp-rulegen.mopt">
+                    nrp-rulegen</option>
+                    <option 
+                    value="stack" 
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/stack/mdeo/stack"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/stack/mdeo/stack/src/main/java/model-5-stacks.mopt">
+                    model-5-stacks</option>
+                    <option 
+                    value="stack" 
+                    data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/stack/mdeo/stack"
+                    data-configured-mopt-file-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/stack/mdeo/stack/src/main/java/model-10-stacks.mopt">
+                    model-10-stacks</option>
                     <option 
                     value="refactoring" 
                     data-mopt-project-path="/Users/munroazumi/Desktop/IndividualProject/casestudies/refactoring/mdeo/refactoring"
@@ -52,27 +71,18 @@
                     refactoring (broken)</option>
             </select>
             <div><button id="runButton">Run Job</button></div>
-            <div><button id="addtodb">Add to DB</button></div>
+        </div>
+        <div class="rightside">
+            <div id="jobGrid" style="height: 470px;" class="ag-theme-alpine-dark"></div>
+            <div id="resultsGrid" style="height: 350px;" class="ag-theme-balham-dark"></div>
         </div>
     </section>
 
     <p th:text="${test}" />
 
     <!--Grid-->
-    <script src="main.js"></script>
-
-<script>
-    $('#addtodb').click(function() {
-        console.log('calling /addtodatabase')
-        $.ajax({
-            method: 'GET',
-            url: "addtodatabase",
-            success: function (result) {
-                console.log(result);
-            }
-        })
-    })
-</script>
+    <script src="jobgrid.js"></script>
+    <script src="resultsgrid.js"></script>
 
     <script>
         $('#runButton').click(function () {
