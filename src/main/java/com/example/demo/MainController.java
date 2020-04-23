@@ -17,15 +17,11 @@ import java.nio.file.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.ui.Model;
-import com.example.demo.storage.StorageProperties;
-import com.example.demo.storage.StorageService;
-import com.example.demo.storage.Find.Finder;
+import com.example.demo.Find.Finder;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.sql.*;
@@ -49,9 +45,8 @@ import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.output.MDEOBatch;
 import uk.ac.kcl.inf.mdeoptimiser.libraries.core.optimisation.output.MDEOResultsOutput;
 
 @SpringBootApplication
-@EnableConfigurationProperties(StorageProperties.class)
 @RestController
-public class DemoApplication {
+public class MainController {
 
 	private static MoptStandaloneSetupGenerated moptStandaloneSetup = new MoptStandaloneSetupGenerated();
 	private ResourceSet resourceSet = new ResourceSetImpl();
@@ -59,24 +54,7 @@ public class DemoApplication {
 	public static void main(String[] args) {
 		moptStandaloneSetup.createInjectorAndDoEMFRegistration();
 		System.out.println(TracePackage.eINSTANCE.getName());
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
-	@Bean
-	CommandLineRunner init(StorageService storageService) {
-		return (args) -> {
-			storageService.deleteAll();
-			storageService.init();
-		};
-	}
-
-	public Connection connectToSQL(Connection con) throws Exception {
-		Properties connectionProps = new Properties();
-    		connectionProps.put("user", "mdeo");
-    		connectionProps.put("password", "asdf");
-			String url = "jdbc:mysql://localhost:3306/MDEOProject";
-			con = DriverManager.getConnection(url, connectionProps);
-			return con;
+		SpringApplication.run(MainController.class, args);
 	}
 	
 	@GetMapping(path = "/getjobs") //Querys MySQL database and gets all jobs. Used to populate ag-Grid in main.js
@@ -89,7 +67,6 @@ public class DemoApplication {
 			String url = "jdbc:mysql://localhost:3306/MDEOProject";
 			Connection con = DriverManager.getConnection(url, connectionProps);
 			String sql = "SELECT * FROM job;";
-			System.out.println(sql);
 			PreparedStatement posted = con.prepareStatement(sql);
 			ResultSet rs = posted.executeQuery();
 			while (rs.next()) {
@@ -113,7 +90,7 @@ public class DemoApplication {
 	}
 	}
 	
-	@GetMapping(path = "/addtodatabase")
+	@GetMapping(path = "/addtodatabase") //Adding new experiment/job to MySQL database before running the job
 	public Integer post(@RequestParam("value1") String moptName) throws Exception {
 		LocalDateTime startTime = LocalDateTime.now();
 		final String var1 = "Running";
@@ -121,7 +98,6 @@ public class DemoApplication {
 		final String var3 = startTime.toString();
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			System.out.println("asdf");
 			Properties connectionProps = new Properties();
     		connectionProps.put("user", "mdeo");
     		connectionProps.put("password", "asdf");
@@ -129,7 +105,6 @@ public class DemoApplication {
 			Connection con = DriverManager.getConnection(url, connectionProps);
 			String generatedColumns[] = { "id" };
 			String sql = "INSERT INTO job (status, name, timestarted) VALUES('"+var1+"', '"+var2+"', '"+var3+"')";
-			System.out.println(sql);
 			PreparedStatement posted = con.prepareStatement(sql, generatedColumns);
 			posted.executeUpdate();
 			try (ResultSet generatedKeys = posted.getGeneratedKeys()) {
@@ -150,7 +125,7 @@ public class DemoApplication {
 	}
 
 	@PostMapping("/run-job")
-	public String runJob(
+	public void runJob(
 		@RequestParam(value = "moptProjectPath")
 		final String moptProjectPath, 
 		@RequestParam(value = "configuredMoptFilePath")
@@ -160,20 +135,21 @@ public class DemoApplication {
 			int endIndex = configuredMoptFilePath.indexOf(".");
 			int beginIndex = configuredMoptFilePath.indexOf("java/") + 5;
 			String moptName = configuredMoptFilePath.substring(beginIndex, endIndex);
+			String url = "jdbc:mysql://localhost:3306/MDEOProject";
+			Properties connectionProps = new Properties();
+			connectionProps.put("user", "mdeo");
+			connectionProps.put("password", "asdf");
 			int id = this.post(moptName);
 			if (id < 0) {
-				return "bad";
+				return;
 			}
-			this._runJob(moptProjectPath, configuredMoptFilePath, batch);
-				Properties connectionProps = new Properties();
-				connectionProps.put("user", "mdeo");
-				connectionProps.put("password", "asdf");
-				String url = "jdbc:mysql://localhost:3306/MDEOProject";
+			try {
+				this._runJob(moptProjectPath, configuredMoptFilePath, batch);
 				Connection con = DriverManager.getConnection(url, connectionProps);
-				LocalDateTime finishTime = LocalDateTime.now();
+					//calculates the duration of an experiment and displays in minutes
+					LocalDateTime finishTime = LocalDateTime.now();
 					String testsql = "SELECT timeStarted FROM job WHERE id = "+id;
 					PreparedStatement queried = con.prepareStatement(testsql);
-						System.out.println(testsql);
 					ResultSet result = queried.executeQuery();
 					result.next();
 					String startTimeString = result.getString("timeStarted");
@@ -185,34 +161,36 @@ public class DemoApplication {
 					String dStep4 = dStep3.concat(" minutes)");
 					String space = " (";
 					String duration = space.concat(dStep4);
-				String uglyFinishTime = finishTime.toString();
-				String step1 = uglyFinishTime.replace("T", " ");
-				String finishTimeString = step1.substring(0, 19);
-				String finishAndDuration = finishTimeString.concat(duration);
+					String uglyFinishTime = finishTime.toString();
+					String step1 = uglyFinishTime.replace("T", " ");
+					String finishTimeString = step1.substring(0, 19);
+					String finishAndDuration = finishTimeString.concat(duration);
 				String sql = "UPDATE job SET status = 'Finished', timefinished = '"+finishAndDuration+"' WHERE id = "+id;
-				System.out.println(sql);
 				PreparedStatement posted = con.prepareStatement(sql);
 				posted.executeUpdate();
-			return "succeeded";
+			} catch(Exception e) {
+				String sql2 = "UPDATE job SET status = 'Failed' WHERE id = "+id;
+				Connection con = DriverManager.getConnection(url, connectionProps);
+				PreparedStatement posted2 = con.prepareStatement(sql2);
+				posted2.executeUpdate();
+			}
 	}
 
-	@PostMapping("/getresults")
+	@PostMapping("/getresults") //Called when experiment row is clicked. Finds results folder and converts it into JSON object for results grid
 	public JSONObject rowSelected(@RequestBody String resultFolder) throws Exception {
 		String step1 = resultFolder.replaceAll("%22", "");
 		String step2 = step1.replace("=", "");
 		String folderName = step2.substring(0, step2.length() - 1);
-		System.out.println(folderName);
 		Finder finder = new Finder("experiment-data.*");
 		Path path = java.nio.file.Paths.get("/Users/munroazumi/Desktop/IndividualProject/casestudies");
         Files.walkFileTree(path, finder);
 		finder.done();
 		String result = finder.findInArray(folderName);
-		System.out.println(result);
 		InputStream inputStream = new FileInputStream(result);
 		JSONObject resultsJson = new JSONObject();
 		JSONArray columnsArray = new JSONArray();
-		resultsJson.put("columns", columnsArray);
 		JSONArray rowsArray = new JSONArray();
+		resultsJson.put("columns", columnsArray);
 		resultsJson.put("rows", rowsArray);
 		CSVParser csvParser = CSVFormat.DEFAULT.parse(new InputStreamReader(inputStream));
 		int index = 0;
@@ -224,12 +202,12 @@ public class DemoApplication {
 				}
 				for (int i = 0; i < record.size(); i++) {
 					csvArray.add(record.get(i));
-					System.out.println(record.get(i));
 					}
 			}
 		return resultsJson;
 	}
 
+	//Runs an experiment through the MDEOptimiser
 	private void _runJob(final String moptProjectPath, final String configuredMoptFilePath, final Integer batch) {
 		if (((configuredMoptFilePath == null) || configuredMoptFilePath.isEmpty())) {
 			throw new RuntimeException("empty configuredMoptFilePath");

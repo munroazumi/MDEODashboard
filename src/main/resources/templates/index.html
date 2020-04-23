@@ -73,16 +73,13 @@
             <div><button id="runButton">Run Job</button></div>
         </div>
         <div class="rightside">
-            <div id="jobGrid" style="height: 470px;" class="ag-theme-alpine-dark"></div>
-            <div id="resultsGrid" style="height: 350px;" class="ag-theme-balham-dark"></div>
+            <div id="jobGrid" style="height: 435px; margin-bottom: 20px;" class="ag-theme-alpine-dark"></div>
+            <div style="height:350 px"><div id="resultsGrid" style="height: 350px;" class="ag-theme-balham-dark"></div></div>
         </div>
     </section>
 
-    <p th:text="${test}" />
-
     <!--Grid-->
-    <script src="jobgrid.js"></script>
-    <script src="resultsgrid.js"></script>
+    <script src="grid.js"></script>
 
     <script>
         $('#runButton').click(function () {
